@@ -1,0 +1,5 @@
+mss>=10.2
+pytesseract
+requests
+python-dotenv
+pillow

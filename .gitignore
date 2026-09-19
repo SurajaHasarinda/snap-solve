@@ -1,0 +1,6 @@
+.env
+screenshots/
+__pycache__/
+.mypy_cache/
+.venv/
+prompt.txt

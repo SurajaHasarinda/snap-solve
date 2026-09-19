@@ -1,4 +1,4 @@
-# SnapSolve
+# SnapSolve 📸🤫
 
 Floating always-on-top window that screenshots your screen, reads the multiple-choice question with Tesseract, and shows the answer from an LLM.
 

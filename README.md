@@ -9,7 +9,7 @@ Floating always-on-top window that screenshots your screen, reads the multiple-c
 | Setup | `.\setup.ps1` | `bash setup.sh` |
 | Run | `.\run.ps1` | `bash run.sh` |
 
-Then put your API details in `.env`. Set `MODE=image` to send the screenshot straight to the model instead of reading it with OCR first (needs a model that accepts images).
+Then put your API details in `.env`. Set `MODE=image` to send the screenshot straight to the model instead of reading it with OCR first (needs a model that accepts images). `KEEP_WARM` (seconds, default 60, `0` = off) sets how often the app pings the API to keep the connection open.
 
 Ubuntu: log in with an **Xorg** session (choose it on the login screen). Screen capture doesn't work on Wayland.
 

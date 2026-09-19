@@ -1,6 +1,8 @@
 """Sends the OCR text or the screenshot to an OpenAI-compatible chat API."""
 import base64
 import io
+import time
+from urllib.parse import urlsplit
 
 import requests
 
@@ -9,6 +11,18 @@ from . import config
 http = requests.Session()  # reuses the connection, so calls after the first are quicker
 
 extra = {"reasoning_effort": "none"}
+
+
+def keep_warm():
+    # Runs in a daemon thread: a cheap HEAD request to the API host (no tokens, no quota) keeps the
+    # TLS connection in the session pool open.
+    u = urlsplit(config.API_URL)
+    while u.scheme:
+        try:
+            http.head(f"{u.scheme}://{u.netloc}", timeout=5)
+        except requests.RequestException:
+            pass
+        time.sleep(config.KEEP_WARM)
 
 
 def image_message(image):

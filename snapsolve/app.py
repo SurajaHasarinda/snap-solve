@@ -10,7 +10,7 @@ import requests
 
 from . import config
 from .capture import grab_screen, read_text
-from .llm import ask, image_message
+from .llm import ask, image_message, keep_warm
 
 FONT = "Segoe UI"  # falls back to the system font on Linux
 BG, FG, MUTED, ACCENT, ACCENT_DARK = "#1e1e1e", "#f5f5f5", "#8a8a8a", "#3b82f6", "#2563eb"
@@ -58,6 +58,8 @@ class App:
         self.root.geometry(f"{self.w}x{h}+{self.root.winfo_screenwidth() - self.w}+{(self.root.winfo_screenheight() - h) // 2}")
 
     def run(self):
+        if config.KEEP_WARM:
+            threading.Thread(target=keep_warm, daemon=True).start()
         self.root.mainloop()
 
     def on_click(self):

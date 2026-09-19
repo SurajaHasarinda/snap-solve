@@ -12,6 +12,7 @@ API_KEY = os.getenv("API_KEY", "")
 MODEL = os.getenv("MODEL", "")
 TESSERACT_CMD = os.getenv("TESSERACT_CMD")
 MODE = os.getenv("MODE", "ocr").lower()  # "ocr" or "image"
+KEEP_WARM = int(os.getenv("KEEP_WARM", "60"))  # seconds between keep-alive pings, 0 = off
 
 SHOTS_DIR = ROOT / "screenshots"
 PROMPT_FILE = ROOT / "prompt.txt"

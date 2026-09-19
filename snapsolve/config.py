@@ -11,6 +11,7 @@ API_URL = os.getenv("API_URL", "")
 API_KEY = os.getenv("API_KEY", "")
 MODEL = os.getenv("MODEL", "")
 TESSERACT_CMD = os.getenv("TESSERACT_CMD")
+MODE = os.getenv("MODE", "ocr").lower()  # "ocr" or "image"
 
 SHOTS_DIR = ROOT / "screenshots"
 PROMPT_FILE = ROOT / "prompt.txt"

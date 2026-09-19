@@ -8,8 +8,9 @@ import tkinter as tk
 import pytesseract
 import requests
 
+from . import config
 from .capture import grab_screen, read_text
-from .llm import ask
+from .llm import ask, image_message
 
 FONT = "Segoe UI"  # falls back to the system font on Linux
 BG, FG, MUTED, ACCENT, ACCENT_DARK = "#1e1e1e", "#f5f5f5", "#8a8a8a", "#3b82f6", "#2563eb"
@@ -41,7 +42,7 @@ class App:
             activebackground=BG, activeforeground=FG, relief="flat", bd=0, cursor="hand2",
         ).pack(side="right")
 
-        self.answer = tk.Label(root, text="Ready", font=(FONT, 13, "bold"), bg=BG, fg=FG,
+        self.answer = tk.Label(root, text=f"Ready ({config.MODE} mode)", font=(FONT, 13, "bold"), bg=BG, fg=FG,
                                wraplength=self.w - 20, justify="left", anchor="w")
         self.answer.pack(fill="x", padx=10)
         self.time = tk.Label(root, text="Right-click to close", font=(FONT, 9), bg=BG, fg=MUTED, anchor="w")
@@ -61,16 +62,22 @@ class App:
 
     def on_click(self):
         self.btn.config(text="⏳  Thinking...", state="disabled")
+        self.root.withdraw()  # hide the popup so it isn't in the screenshot
+        # Wait 100ms so the screen redraws without it, then work in a background thread.
         # daemon=True: a hung request won't keep the app alive after you close it.
-        threading.Thread(target=self.solve, daemon=True).start()
+        self.root.after(100, threading.Thread(target=self.solve, daemon=True).start)
 
     def solve(self):
         # Runs in a background thread: screen grab, OCR and the API call all happen here.
         start, path = time.perf_counter(), None
         try:
             image, path = grab_screen()
-            text = read_text(image)
-            result = ask(text) if text else "No text detected."
+            self.root.after(0, self.root.deiconify)  # show the popup again while OCR and the API run
+            if config.MODE == "image":
+                result = ask(image_message(image))
+            else:
+                text = read_text(image)
+                result = ask(text) if text else "No text detected."
         except pytesseract.TesseractNotFoundError:
             result = "Tesseract not found. Install it or set TESSERACT_CMD in .env."
         except requests.HTTPError as e:
@@ -86,6 +93,7 @@ class App:
         self.root.after(0, self.show, result, elapsed)
 
     def show(self, result, elapsed):
+        self.root.deiconify()  # in case the capture itself failed
         self.answer.config(text=result)
         self.time.config(text=f"⏱  {elapsed:.2f}s")
         self.btn.config(text="⛶  Capture", state="normal")

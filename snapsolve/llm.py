@@ -1,4 +1,7 @@
-"""Sends the OCR text to an OpenAI-compatible chat API."""
+"""Sends the OCR text or the screenshot to an OpenAI-compatible chat API."""
+import base64
+import io
+
 import requests
 
 from . import config
@@ -6,6 +9,16 @@ from . import config
 http = requests.Session()  # reuses the connection, so calls after the first are quicker
 
 extra = {"reasoning_effort": "none"}
+
+
+def image_message(image):
+    # The screenshot as a JPEG data URL in the OpenAI vision format; JPEG uploads much faster than PNG.
+    buf = io.BytesIO()
+    image.save(buf, "JPEG", quality=85)
+    return [
+        {"type": "text", "text": "."},  # vision APIs require a text part alongside the image; the system prompt has the real instructions
+        {"type": "image_url", "image_url": {"url": "data:image/jpeg;base64," + base64.b64encode(buf.getvalue()).decode()}},
+    ]
 
 
 def ask(question):

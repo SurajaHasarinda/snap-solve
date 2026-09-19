@@ -4,7 +4,7 @@ import time
 import mss
 import mss.tools
 import pytesseract
-from PIL import Image
+from PIL import Image, ImageChops
 
 from . import config
 
@@ -24,5 +24,9 @@ def grab_screen():
 
 
 def read_text(image):
-    # Grayscale + psm 6 (treat the screen as one block of text) skips Tesseract's slow layout analysis.
-    return pytesseract.image_to_string(image.convert("L"), config="--psm 6").strip()
+    # Keep only near-white pixels (min of R,G,B > 200) as white. Plain grayscale makes white text on
+    # light green/orange buttons vanish; this keeps it, plus dark text on white boxes.
+    r, g, b = image.convert("RGB").split()
+    bw = ImageChops.darker(ImageChops.darker(r, g), b).point(lambda p: 255 if p > 200 else 0)
+    # psm 6 (treat the screen as one block of text) skips Tesseract's slow layout analysis.
+    return pytesseract.image_to_string(bw, config="--psm 6").strip()
